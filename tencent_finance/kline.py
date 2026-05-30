@@ -104,6 +104,9 @@ def _parse_hk_kline_response(content: bytes, prefixed_code: str, period: Period,
     return df
 
 
+_MINUTE_PERIODS = {Period.MIN_1, Period.MIN_5, Period.MIN_15, Period.MIN_30, Period.MIN_60, Period.MIN_120}
+
+
 def get_kline(
     client: SyncHttpClient,
     code: str,
@@ -114,6 +117,10 @@ def get_kline(
 ) -> pd.DataFrame:
     """Fetch K-line data synchronously."""
     prefixed = prefix_code(code)
+
+    if prefixed.startswith("us") and period in _MINUTE_PERIODS:
+        raise APIError("US stock minute kline is not supported by Tencent API")
+
     url = kline_url(prefixed, period, start, end, adjust)
 
     try:
@@ -139,6 +146,10 @@ async def async_get_kline(
 ) -> pd.DataFrame:
     """Fetch K-line data asynchronously."""
     prefixed = prefix_code(code)
+
+    if prefixed.startswith("us") and period in _MINUTE_PERIODS:
+        raise APIError("US stock minute kline is not supported by Tencent API")
+
     url = kline_url(prefixed, period, start, end, adjust)
 
     try:

@@ -13,14 +13,14 @@ def validate_code(code: str) -> None:
 
 
 def detect_market(code: str) -> str:
-    """Detect market (sh, sz, hk) from a stock code.
+    """Detect market (sh, sz, hk, us) from a stock code.
 
     Returns the market prefix string. For already-prefixed codes (e.g. "sh600000"),
     returns the prefix as-is.
     """
     validate_code(code)
 
-    if code.startswith(("sh", "sz", "zz")):
+    if code.startswith(("sh", "sz", "zz", "us")):
         return code[:2]
 
     # HK: exactly 5 digits
@@ -31,19 +31,26 @@ def detect_market(code: str) -> str:
     if code.startswith(_SHANGHAI_PREFIXES) or code.startswith(_SHANGHAI_SINGLE):
         return "sh"
 
+    # US: all uppercase letters, 1-5 chars
+    if code.isalpha() and code.isupper() and 1 <= len(code) <= 5:
+        return "us"
+
     return "sz"
 
 
 def prefix_code(code: str) -> str:
     """Convert bare stock code to prefixed form for API calls.
 
-    Examples: "600000" -> "sh600000", "000001" -> "sz000001", "00700" -> "hk00700"
+    Examples: "600000" -> "sh600000", "000001" -> "sz000001", "00700" -> "hk00700",
+    "KLAC" -> "usKLAC.OQ"
     Already-prefixed codes are returned as-is.
     """
     validate_code(code)
 
-    if code.startswith(("sh", "sz", "hk", "zz")):
+    if code.startswith(("sh", "sz", "hk", "zz", "us")):
         return code
 
     market = detect_market(code)
+    if market == "us":
+        return f"us{code}.OQ"
     return f"{market}{code}"

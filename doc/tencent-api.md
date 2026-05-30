@@ -115,6 +115,34 @@ _var=kline_{unit}{hk_adjust}&param=hk{code},{unit},,,{count},{hk_adjust}
 | Market | Prefix | Rules |
 |--------|--------|-------|
 | Shanghai | `sh` | Starts with `50`, `51`, `60`, `90`, `110`, `113`, `132`, `204`, `5`, `6`, `9`, `7` |
-| Shenzhen | `sz` | All other codes not matching Shanghai or HK |
+| Shenzhen | `sz` | All other codes not matching Shanghai, HK, or US |
 | Hong Kong | `hk` | Exactly 5 digits |
-| Already prefixed | — | Starts with `sh`, `sz`, `zz` — use as-is |
+| US | `us` | All uppercase letters, 1-5 chars (e.g. `KLAC`, `AAPL`, `GOOGL`) |
+| Already prefixed | — | Starts with `sh`, `sz`, `zz`, `us` — use as-is |
+
+---
+
+## 5. US Stock K-line
+
+**Endpoint:** Same as A-share daily (`proxy.finance.qq.com`), with `us` prefix.
+
+**Code format:** `us{TICKER}.OQ` — `.OQ` is a universal suffix for all US stocks.
+
+**Examples:**
+```
+KLAC    → usKLAC.OQ
+AAPL    → usAAPL.OQ
+JPM     → usJPM.OQ
+GOOGL   → usGOOGL.OQ
+```
+
+**Request:**
+```
+GET https://proxy.finance.qq.com/ifzqgtimg/appstock/app/newfqkline/get?param=usKLAC.OQ,day,,,10,qfq
+```
+
+**Response:** Same structure as A-share daily.
+
+**Limitations:**
+- Minute kline NOT supported (use daily/weekly/monthly only)
+- Real-time quote NOT supported

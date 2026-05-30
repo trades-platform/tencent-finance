@@ -3,6 +3,7 @@ import pytest
 from datetime import datetime, timedelta
 
 from tencent_finance import Client, AsyncClient, Period, Adjust
+from tencent_finance.exceptions import APIError
 
 
 @pytest.fixture
@@ -43,6 +44,33 @@ class TestKlineSync:
     def test_no_adjust(self, client: Client, start, end):
         df = client.get_kline("600000", Period.DAILY, start, end, Adjust.NONE)
         assert not df.empty
+
+
+class TestKlineUS:
+    def test_us_daily_bare_ticker(self, client: Client, start, end):
+        df = client.get_kline("KLAC", Period.DAILY, start, end)
+        assert not df.empty
+        assert list(df.columns) == ["open", "high", "low", "close", "volume"]
+        assert df.attrs["code"] == "KLAC"
+        assert df.attrs["name"]
+
+    def test_us_daily_aapl(self, client: Client, start, end):
+        df = client.get_kline("AAPL", Period.DAILY, start, end)
+        assert not df.empty
+        assert df.attrs["code"] == "AAPL"
+
+    def test_us_daily_jpm(self, client: Client, start, end):
+        df = client.get_kline("JPM", Period.DAILY, start, end)
+        assert not df.empty
+
+    def test_us_already_prefixed(self, client: Client, start, end):
+        df = client.get_kline("usKLAC.OQ", Period.DAILY, start, end)
+        assert not df.empty
+        assert df.attrs["code"] == "usKLAC.OQ"
+
+    def test_us_minute_raises(self, client: Client, start, end):
+        with pytest.raises(APIError, match="US stock minute kline"):
+            client.get_kline("KLAC", Period.MIN_5, start, end)
 
 
 class TestKlineAsync:

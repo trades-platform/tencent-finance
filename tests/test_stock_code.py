@@ -47,6 +47,14 @@ class TestDetectMarket:
         assert detect_market("sh600000") == "sh"
         assert detect_market("sz000001") == "sz"
         assert detect_market("zz000001") == "zz"
+        assert detect_market("usKLAC.OQ") == "us"
+
+    def test_us_bare_ticker(self):
+        assert detect_market("KLAC") == "us"
+        assert detect_market("AAPL") == "us"
+        assert detect_market("JPM") == "us"
+        assert detect_market("A") == "us"
+        assert detect_market("GOOGL") == "us"
 
 
 class TestPrefixCode:
@@ -63,6 +71,12 @@ class TestPrefixCode:
         assert prefix_code("sh600000") == "sh600000"
         assert prefix_code("sz000001") == "sz000001"
         assert prefix_code("hk00700") == "hk00700"
+        assert prefix_code("usKLAC.OQ") == "usKLAC.OQ"
+
+    def test_us_bare_ticker(self):
+        assert prefix_code("KLAC") == "usKLAC.OQ"
+        assert prefix_code("AAPL") == "usAAPL.OQ"
+        assert prefix_code("JPM") == "usJPM.OQ"
 
     def test_empty_raises(self):
         with pytest.raises(InvalidCodeError):
